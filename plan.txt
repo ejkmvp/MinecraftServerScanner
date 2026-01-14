@@ -1,0 +1,37 @@
+This is going to document my plan for the actual network script and how it will send/receive messages
+
+Every N scans, we will try to pull the IP list from the main server again. We will do this via a database to keep the network stuff simple
+
+Each scan, we will have all messages go out the same randomly chosen port. This will make our sniff function easier I think
+
+
+Main loop...
+	check if the local buffer size is above some number. If it is, block for lock acquire
+		Write all data to DB. 
+		If the write fails, maintain the data in the local buffer. Otherwise, get rid of it
+
+	check if its time for next scan. If it is, call the scan function
+
+Each scan...
+	random port chosen
+	async sniffer started
+	every packet sent out using custom send function
+	After some timeout, the scanner is stopped
+
+Async sniffer function:
+	If the packet is a SYN ACK, then send an ACK and then a custom packet for the server information
+	If the packet is a response to the custom server information, then run the log data function
+
+custom send function:
+	Block for send lock acquire
+	Block until the previousPacketSendTime is at least INTERVAL in the past
+	Send the packet
+	update previousPacketSendTime
+	release send lock
+
+
+log data function:
+	Block for data lock
+	Write to local buffer
+	release data lock
+
