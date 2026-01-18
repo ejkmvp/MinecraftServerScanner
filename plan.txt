@@ -4,6 +4,8 @@ Every N scans, we will try to pull the IP list from the main server again. We wi
 
 Each scan, we will have all messages go out the same randomly chosen port. This will make our sniff function easier I think
 
+When a SCAN occures, each IP Address should have a TTL that gets decremented by 1. This way, dead networks can have a TTL of 6 so they only get scanned every 6 intervals, and alive networks can have a TTL of 1 so they get scanned every interval
+
 
 Main loop...
 	check if the local buffer size is above some number. If it is, block for lock acquire
@@ -35,3 +37,12 @@ log data function:
 	Write to local buffer
 	release data lock
 
+
+I need a way to take X number of IP Addresses, and make sure they get fully processed before continuing on
+
+Theres two ways the next IP Address should be pulled:
+	the final packet comes back for the IP Address
+	timeout occures 
+
+
+Or instead of that, we just need to prioritize responding to sending new, so we have two queues. One queue contains initial sends, the other queue contains anything else that needs to be dispatched
